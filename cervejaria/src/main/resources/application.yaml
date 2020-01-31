@@ -1,2 +1,8 @@
 server:
   port: 8081
+
+spring:
+  datasource:
+    url: jdbc:h2:file:D:\codigos\FIAP-Spring\cervejaria\fiapcervejaria;DB_CLOSE_ON_EXIT=FALSE
+    username: fiap
+    password: fiap

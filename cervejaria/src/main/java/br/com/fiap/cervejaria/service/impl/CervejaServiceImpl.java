@@ -7,10 +7,11 @@ import br.com.fiap.cervejaria.dto.Tipo;
 import br.com.fiap.cervejaria.entity.Cerveja;
 import br.com.fiap.cervejaria.repository.CervejaRepository;
 import br.com.fiap.cervejaria.service.CervejaService;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -18,44 +19,70 @@ public class CervejaServiceImpl implements CervejaService {
 
     private CervejaRepository cervejaRepository;
 
-    public CervejaServiceImpl(CervejaRepository cervejaRepository){
+    public CervejaServiceImpl(CervejaRepository cervejaRepository) {
         this.cervejaRepository = cervejaRepository;
     }
 
     @Override
     public List<CervejaDTO> findAll(Tipo tipo) {
-        return cervejaRepository.findAll()
+        List<Cerveja> cervejaList;
+        if (tipo == null) {
+            cervejaList = cervejaRepository.findAll();
+        } else {
+            cervejaList = cervejaRepository.findAllByTipo(tipo);
+        }
+
+        return cervejaList
                 .stream()
                 .map(CervejaDTO::new)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Optional<Cerveja> findById(Integer id) {
-        return cervejaRepository.findById(id);
+    public CervejaDTO findById(Integer id) {
+        return saveAndGetCervejaDTO(getCerveja(id));
+    }
+
+    private Cerveja getCerveja(Integer id) {
+        return cervejaRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     @Override
     public CervejaDTO create(CreateCervejaDTO createCervejaDTO) {
-      Cerveja cerveja = new Cerveja(createCervejaDTO);
+        Cerveja cerveja = new Cerveja(createCervejaDTO);
 
-      Cerveja savedCerveja = cervejaRepository.save(cerveja);
-
-      return new CervejaDTO(savedCerveja);
+        return saveAndGetCervejaDTO(cerveja);
     }
 
     @Override
     public CervejaDTO update(Integer id, CreateCervejaDTO createCervejaDTO) {
-        return null;
+        Cerveja cerveja =  getCerveja(id);
+        cerveja.setMarca(createCervejaDTO.getMarca());
+        cerveja.setPreco(createCervejaDTO.getPreco());
+        cerveja.setDataLancamento(createCervejaDTO.getDataLancamento());
+        cerveja.setTipo(createCervejaDTO.getTipo());
+        cerveja.setTeorAlcoolico(createCervejaDTO.getTeorAlcoolico());
+
+        return saveAndGetCervejaDTO(cerveja);
     }
 
     @Override
     public CervejaDTO update(Integer id, PrecoCervejaDTO precoCervejaDTO) {
-        return null;
+        Cerveja cerveja = getCerveja(id);
+        cerveja.setPreco(precoCervejaDTO.getPreco());
+
+        return saveAndGetCervejaDTO(cerveja);
+    }
+
+    private CervejaDTO saveAndGetCervejaDTO(Cerveja cerveja) {
+        Cerveja savedCerveja = cervejaRepository.save(cerveja);
+        return new CervejaDTO(savedCerveja);
     }
 
     @Override
     public void delete(Integer id) {
-
+        Cerveja cerveja = getCerveja(id);
+        cervejaRepository.delete(cerveja);
     }
 }

@@ -3,7 +3,9 @@ package br.com.fiap.cervejaria.dto;
 import br.com.fiap.cervejaria.entity.Cerveja;
 
 import java.math.BigDecimal;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Date;
 
 public class CervejaDTO {
 
@@ -13,6 +15,8 @@ public class CervejaDTO {
     private Tipo tipo;
     private BigDecimal preco;
     private ZonedDateTime dataLancamento;
+    private ZonedDateTime dataCriacao;
+    private ZonedDateTime dataModificacao;
 
     public CervejaDTO(CreateCervejaDTO createCervejaDTO, Integer id){
         this.id = id;
@@ -39,6 +43,12 @@ public class CervejaDTO {
         this.tipo = cerveja.getTipo();
         this.preco = cerveja.getPreco();
         this.dataLancamento = cerveja.getDataLancamento();
+        this.dataCriacao = convertToZonedDateTime(cerveja.getDataCriacao());
+        this.dataModificacao = convertToZonedDateTime(cerveja.getDataModificacao());
+    }
+
+    private ZonedDateTime convertToZonedDateTime(Date date){
+        return ZonedDateTime.ofInstant(date.toInstant(), ZoneOffset.systemDefault());
     }
 
     public Integer getId() {
@@ -87,5 +97,21 @@ public class CervejaDTO {
 
     public void setDataLancamento(ZonedDateTime dataLancamento) {
         this.dataLancamento = dataLancamento;
+    }
+
+    public ZonedDateTime getDataCriacao() {
+        return dataCriacao;
+    }
+
+    public void setDataCriacao(ZonedDateTime dataCriacao) {
+        this.dataCriacao = dataCriacao;
+    }
+
+    public ZonedDateTime getDataAtualizacao() {
+        return dataModificacao;
+    }
+
+    public void setDataAtualizacao(ZonedDateTime dataAtualizacao) {
+        this.dataModificacao = dataAtualizacao;
     }
 }
